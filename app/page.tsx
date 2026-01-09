@@ -123,6 +123,15 @@ export default function Home() {
         ]);
 
       if (error) throw error;
+      fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone: phoneNumber,
+          country: formData.country,
+          gpa: formData.gpa
+        })
+      });
 
       // 成功逻辑
       setIsSuccess(true);
