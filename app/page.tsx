@@ -14,11 +14,11 @@ interface LeadData {
 
 export default function Home() {
   const [step, setStep] = useState(0);
-  
+
   // 核心状态管理
   const [formData, setFormData] = useState<LeadData>({ grade: '', gpa: '', country: '' });
   const [phoneNumber, setPhoneNumber] = useState('');
-  
+
   // 交互状态
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [loadingText, setLoadingText] = useState('');
@@ -28,6 +28,9 @@ export default function Home() {
 
   // 模拟通告栏数据
   const [fakeUser, setFakeUser] = useState("138****8821 刚刚获取了英国名校报告");
+
+  // 随机用户数量 (50-500)
+  const [userCount] = useState(() => Math.floor(Math.random() * 451) + 50);
 
   // 假进度条文案
   const loadingSequence = [
@@ -45,7 +48,19 @@ export default function Home() {
         "139****1234 刚刚获取了香港大学预测报告",
         "186****5678 刚刚获取了哥伦比亚大学预测报告",
         "135****9999 刚刚获取了NUS预测报告",
-        "150****3321 刚刚解锁了考研胜率分析"
+        "150****3321 刚刚解锁了考研胜率分析",
+        "188****7766 刚刚获取了UCL录取概率分析",
+        "137****4455 刚刚解锁了LSE保底方案",
+        "159****8822 刚刚获取了帝国理工预测报告",
+        "176****2233 刚刚获取了康奈尔大学胜率分析",
+        "133****6677 刚刚解锁了南洋理工录取评估",
+        "182****9988 刚刚获取了墨尔本大学预测报告",
+        "151****5544 刚刚解锁了双非逆袭方案",
+        "198****3366 刚刚获取了港中文深圳预测报告",
+        "136****7788 刚刚解锁了跨专业申请分析",
+        "177****1122 刚刚获取了爱丁堡大学录取评估",
+        "189****4499 刚刚解锁了多国联申策略",
+        "152****8833 刚刚获取了曼彻斯特大学预测报告"
       ];
       setFakeUser(users[Math.floor(Math.random() * users.length)]);
     }, 3000);
@@ -83,11 +98,11 @@ export default function Home() {
   // 4. 最终提交 (写入 Supabase)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // 简单校验
     if (!/^1[3-9]\d{9}$/.test(phoneNumber)) {
-        alert("请输入正确的 11 位手机号");
-        return;
+      alert("请输入正确的 11 位手机号");
+      return;
     }
 
     setIsSubmitting(true);
@@ -97,13 +112,13 @@ export default function Home() {
       const { error } = await supabase
         .from('leads')
         .insert([
-          { 
+          {
             phone: phoneNumber,
             target_country: formData.country,
             gpa: formData.gpa,
             // 如果你的数据库里有 grade 字段也可以存，没有就不存
             // created_at 会自动生成
-            status: 'new' 
+            status: 'new'
           },
         ]);
 
@@ -111,7 +126,7 @@ export default function Home() {
 
       // 成功逻辑
       setIsSuccess(true);
-      
+
     } catch (error) {
       console.error('Submission Error:', error);
       alert("网络繁忙，请稍后重试");
@@ -150,7 +165,7 @@ export default function Home() {
         <AnimatePresence mode='wait'>
           {/* Step 0: 首页 (Landing) */}
           {step === 0 && !isSuccess && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -175,9 +190,9 @@ export default function Home() {
                     <span>26Fall 竞争激烈度预测上涨 40%，窗口正在收紧。</span>
                   </span>
                 </p>
-                
+
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-                  <button 
+                  <button
                     onClick={() => setStep(1)}
                     className="relative w-full sm:w-auto px-8 py-4 rounded-2xl font-semibold text-sm tracking-wide bg-gradient-to-r from-sky-500 via-indigo-500 to-fuchsia-500 hover:from-sky-400 hover:via-indigo-400 hover:to-fuchsia-400 text-white flex items-center justify-center gap-2 transition-all active:scale-[0.97] shadow-[0_0_35px_rgba(56,189,248,0.55)]"
                   >
@@ -192,7 +207,7 @@ export default function Home() {
                       <div className="h-6 w-6 rounded-full bg-slate-500/50 border border-slate-100/40" />
                       <div className="h-6 w-6 rounded-full bg-slate-400/60 border border-slate-50/40" />
                     </div>
-                    <span>近 24 小时内已有 327 位同专业同档学生使用</span>
+                    <span>近 24 小时内已有 {userCount} 位同专业同档学生使用</span>
                   </div>
                 </div>
               </div>
@@ -235,131 +250,131 @@ export default function Home() {
           {/* Step 1-3: 问题收集 Wizard */}
           {(step >= 1 && step <= 3) && (
             <motion.div
-                key="wizard"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="flex flex-col flex-1 pt-4"
+              key="wizard"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="flex flex-col flex-1 pt-4"
             >
-                {/* 进度条 */}
-                <div className="flex gap-2 mb-8">
-                    {[1,2,3].map(i => (
-                        <div key={i} className={`h-1 flex-1 rounded-full transition-colors duration-300 ${step >= i ? 'bg-blue-500' : 'bg-gray-800'}`} />
-                    ))}
-                </div>
+              {/* 进度条 */}
+              <div className="flex gap-2 mb-8">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className={`h-1 flex-1 rounded-full transition-colors duration-300 ${step >= i ? 'bg-blue-500' : 'bg-gray-800'}`} />
+                ))}
+              </div>
 
-                <h2 className="text-2xl font-bold mb-8">
-                    {step === 1 && "目前所在年级？"}
-                    {step === 2 && "当前平均分/GPA？"}
-                    {step === 3 && "目标国家/地区？"}
-                </h2>
+              <h2 className="text-2xl font-bold mb-8">
+                {step === 1 && "目前所在年级？"}
+                {step === 2 && "当前平均分/GPA？"}
+                {step === 3 && "目标国家/地区？"}
+              </h2>
 
-                <div className="space-y-3">
-                    {step === 1 && ["大三/大四", "已毕业工作", "大一/大二", "考研二战"].map(opt => (
-                        <OptionBtn key={opt} text={opt} onClick={() => handleSelect('grade', opt, 2)} />
-                    ))}
-                    {step === 2 && ["GPA 3.5+ / 85分+", "GPA 3.0-3.5 / 80-85", "GPA 3.0以下", "暂不清楚"].map(opt => (
-                        <OptionBtn key={opt} text={opt} onClick={() => handleSelect('gpa', opt, 3)} />
-                    ))}
-                    {step === 3 && ["美国 US", "英国 UK", "中国香港 HK", "新加坡 SG", "澳洲 AU"].map(opt => (
-                        <OptionBtn key={opt} text={opt} onClick={() => handleSelect('country', opt, 'analyze')} />
-                    ))}
-                </div>
+              <div className="space-y-3">
+                {step === 1 && ["大三/大四", "已毕业工作", "大一/大二", "考研二战"].map(opt => (
+                  <OptionBtn key={opt} text={opt} onClick={() => handleSelect('grade', opt, 2)} />
+                ))}
+                {step === 2 && ["GPA 3.5+ / 85分+", "GPA 3.0-3.5 / 80-85", "GPA 3.0以下", "暂不清楚"].map(opt => (
+                  <OptionBtn key={opt} text={opt} onClick={() => handleSelect('gpa', opt, 3)} />
+                ))}
+                {step === 3 && ["美国 US", "英国 UK", "中国香港 HK", "新加坡 SG", "澳洲 AU"].map(opt => (
+                  <OptionBtn key={opt} text={opt} onClick={() => handleSelect('country', opt, 'analyze')} />
+                ))}
+              </div>
             </motion.div>
           )}
 
           {/* Step 4: AI 计算动画 (Loading) */}
           {step === 4 && isAnalyzing && (
-             <motion.div 
-                key="analyzing"
-                className="flex flex-col items-center justify-center flex-1 font-mono text-sm text-green-500"
-             >
-                <Terminal size={48} className="mb-8 text-green-400 animate-pulse" />
-                <div className="w-64 h-1 bg-gray-800 rounded-full overflow-hidden mb-6 relative">
-                    <motion.div 
-                        className="h-full bg-green-500 absolute left-0 top-0"
-                        initial={{ width: "0%" }}
-                        animate={{ width: "100%" }}
-                        transition={{ duration: 6, ease: "linear" }}
-                    />
-                </div>
-                <p className="animate-pulse">{loadingText}</p>
-             </motion.div>
+            <motion.div
+              key="analyzing"
+              className="flex flex-col items-center justify-center flex-1 font-mono text-sm text-green-500"
+            >
+              <Terminal size={48} className="mb-8 text-green-400 animate-pulse" />
+              <div className="w-64 h-1 bg-gray-800 rounded-full overflow-hidden mb-6 relative">
+                <motion.div
+                  className="h-full bg-green-500 absolute left-0 top-0"
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 6, ease: "linear" }}
+                />
+              </div>
+              <p className="animate-pulse">{loadingText}</p>
+            </motion.div>
           )}
 
           {/* Step 5: 拦截门 (Lead Magnet) */}
           {showGate && !isSuccess && (
-             <motion.div 
-                key="gate"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col flex-1 pt-10"
-             >
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-6 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-10 flex items-center justify-center flex-col gap-2">
-                        <Lock className="text-gray-400 group-hover:text-white transition-colors" size={32} />
-                        <span className="text-xs text-gray-500 font-mono">ENCRYPTED REPORT</span>
-                    </div>
-                    {/* 假报告背景内容 */}
-                    <div className="opacity-30 blur-sm select-none pointer-events-none">
-                        <div className="flex justify-between items-end mb-4 border-b border-gray-700 pb-2">
-                           <h3 className="text-xl font-bold">录取概率分析</h3>
-                           <span className="text-4xl font-bold text-green-500">88%</span>
-                        </div>
-                        <div className="w-3/4 h-4 bg-gray-600 rounded mb-2"/>
-                        <div className="w-1/2 h-4 bg-gray-600 rounded mb-2"/>
-                        <div className="w-full h-24 bg-gray-700 rounded mt-4"/>
-                    </div>
+            <motion.div
+              key="gate"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex flex-col flex-1 pt-10"
+            >
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-6 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-10 flex items-center justify-center flex-col gap-2">
+                  <Lock className="text-gray-400 group-hover:text-white transition-colors" size={32} />
+                  <span className="text-xs text-gray-500 font-mono">ENCRYPTED REPORT</span>
                 </div>
-
-                <div className="text-center mb-6">
-                    <h3 className="text-xl font-bold mb-2">报告已生成</h3>
-                    <p className="text-gray-400 text-sm">为保护数据隐私，结果仅发送至本人手机</p>
+                {/* 假报告背景内容 */}
+                <div className="opacity-30 blur-sm select-none pointer-events-none">
+                  <div className="flex justify-between items-end mb-4 border-b border-gray-700 pb-2">
+                    <h3 className="text-xl font-bold">录取概率分析</h3>
+                    <span className="text-4xl font-bold text-green-500">88%</span>
+                  </div>
+                  <div className="w-3/4 h-4 bg-gray-600 rounded mb-2" />
+                  <div className="w-1/2 h-4 bg-gray-600 rounded mb-2" />
+                  <div className="w-full h-24 bg-gray-700 rounded mt-4" />
                 </div>
+              </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <input 
-                        type="tel" 
-                        placeholder="请输入接收报告的手机号" 
-                        className="w-full bg-black border border-gray-700 rounded-xl px-4 py-4 text-white focus:border-blue-500 outline-none transition-colors text-lg text-center tracking-widest"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                        disabled={isSubmitting}
-                    />
-                    <button 
-                        type="submit" 
-                        disabled={isSubmitting}
-                        className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-blue-900 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2"
-                    >
-                        {isSubmitting ? <Loader2 className="animate-spin" /> : "免费解锁详细报告"}
-                    </button>
-                    <p className="text-center text-xs text-gray-600">
-                        点击即代表同意《用户隐私协议》并接受专家解读
-                    </p>
-                </form>
-             </motion.div>
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-bold mb-2">报告已生成</h3>
+                <p className="text-gray-400 text-sm">为保护数据隐私，结果仅发送至本人手机</p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <input
+                  type="tel"
+                  placeholder="请输入接收报告的手机号"
+                  className="w-full bg-black border border-gray-700 rounded-xl px-4 py-4 text-white focus:border-blue-500 outline-none transition-colors text-lg text-center tracking-widest"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  disabled={isSubmitting}
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-blue-900 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? <Loader2 className="animate-spin" /> : "免费解锁详细报告"}
+                </button>
+                <p className="text-center text-xs text-gray-600">
+                  点击即代表同意《用户隐私协议》并接受专家解读
+                </p>
+              </form>
+            </motion.div>
           )}
 
           {/* Success State: 成功页 */}
           {isSuccess && (
             <motion.div
-                key="success"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center justify-center flex-1 text-center"
+              key="success"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex flex-col items-center justify-center flex-1 text-center"
             >
-                <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-6 text-green-500">
-                    <CheckCircle size={40} />
-                </div>
-                <h2 className="text-2xl font-bold mb-4">提交成功！</h2>
-                <p className="text-gray-400 mb-8 leading-relaxed">
-                    您的 2026 录取概率报告已进入排队队列。<br/>
-                    <span className="text-white font-bold">高级留学顾问将在 10 分钟内</span><br/>
-                    通过电话为您进行 1对1 深度解读。
-                </p>
-                <div className="p-4 bg-white/5 rounded-lg border border-white/10 text-sm text-gray-500">
-                    请留意来自北京/上海的电话，以免错过报告
-                </div>
+              <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-6 text-green-500">
+                <CheckCircle size={40} />
+              </div>
+              <h2 className="text-2xl font-bold mb-4">提交成功！</h2>
+              <p className="text-gray-400 mb-8 leading-relaxed">
+                您的 2026 录取概率报告已进入排队队列。<br />
+                <span className="text-white font-bold">高级留学顾问将在 10 分钟内</span><br />
+                通过电话为您进行 1对1 深度解读。
+              </p>
+              <div className="p-4 bg-white/5 rounded-lg border border-white/10 text-sm text-gray-500">
+                请留意来自北京/上海的电话，以免错过报告
+              </div>
             </motion.div>
           )}
 
@@ -371,13 +386,13 @@ export default function Home() {
 
 // 简单的按钮组件
 function OptionBtn({ text, onClick }: { text: string; onClick: () => void }) {
-    return (
-        <button 
-            onClick={onClick}
-            className="w-full text-left bg-white/5 border border-white/10 hover:bg-white/10 hover:border-blue-500/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.1)] text-gray-200 py-4 px-6 rounded-xl transition-all active:scale-[0.98] group flex justify-between items-center"
-        >
-            <span className="font-medium">{text}</span>
-            <ArrowRight size={16} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-blue-400"/>
-        </button>
-    )
+  return (
+    <button
+      onClick={onClick}
+      className="w-full text-left bg-white/5 border border-white/10 hover:bg-white/10 hover:border-blue-500/30 hover:shadow-[0_0_15px_rgba(59,130,246,0.1)] text-gray-200 py-4 px-6 rounded-xl transition-all active:scale-[0.98] group flex justify-between items-center"
+    >
+      <span className="font-medium">{text}</span>
+      <ArrowRight size={16} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all text-blue-400" />
+    </button>
+  )
 }
